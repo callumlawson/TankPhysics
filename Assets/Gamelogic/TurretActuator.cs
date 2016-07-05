@@ -2,7 +2,7 @@
 
 namespace Assets.Gamelogic.Visualizers.Physical
 {
-    internal class TurretActuator : MonoBehaviour
+    public class TurretActuator : MonoBehaviour
     {
         public GameObject OurCamera;
         public GameObject Turret;

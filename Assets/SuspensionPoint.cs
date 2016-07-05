@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-using System.Collections;
 
 public class SuspensionPoint : MonoBehaviour
 {
@@ -15,7 +14,10 @@ public class SuspensionPoint : MonoBehaviour
     // Use this for initialization
     private void Start()
     {
-        InitialTrackPosition = Track.GetComponent<Transform>().localPosition;
+        if (Track)
+        {
+            InitialTrackPosition = Track.GetComponent<Transform>().localPosition;
+        }
     }
 
     // Update is called once per frame
@@ -23,7 +25,7 @@ public class SuspensionPoint : MonoBehaviour
     {
         if (Track)
         {
-            UpdateTrackPosition(SuspensionLengthMeters);
+            UpdateTrackPosition(SuspensionLengthMeters/2 - 0.2f); //LOL
         }
     }
 

@@ -7,14 +7,12 @@ namespace Assets.Gamelogic.Visualizers.Controls
     {
         public float SensitivityX;
         public float SensitivityY;
-        public float SensitivityMousewheel;
 
         public GameObject OurCamera;
         public GameObject CameraRoot;
 
         private float LateralRotation;
         private float VerticalRotation;
-        private float MousewheelMovement;
 
         private Quaternion _rootAngle;
         private Quaternion _rotateAngle;
@@ -42,7 +40,6 @@ namespace Assets.Gamelogic.Visualizers.Controls
 
             LateralRotation = Input.GetAxis("Mouse X") * SensitivityX;
             VerticalRotation = -Input.GetAxis("Mouse Y") * SensitivityY;
-            MousewheelMovement = Input.GetAxis("Mouse ScrollWheel") * SensitivityMousewheel;
 
             _rootAngle = Quaternion.AngleAxis(LateralRotation, Vector3.up) * Quaternion.AngleAxis(VerticalRotation, _rootAngle * -Vector3.left) * _rootAngle;
 

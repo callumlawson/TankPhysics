@@ -1,81 +1,80 @@
 ﻿using UnityEngine;
-using System.Collections;
 
 public class MovementController : MonoBehaviour
 {
     public Rigidbody OurRigidbody;
     public float ForceMagnitude = 100;
+    public float DragFactor = 10;
+    public float TorqueFactor = 8;
 
-    // Use this for initialization
-    void Start()
+    [SerializeField] private bool isGrounded;
+    [SerializeField] private Vector3 engineForce;
+    [SerializeField] private float lateralMovementFactor;
+    private Vector3 forwardDirectionOnPlane;
+    private Vector3 forceApplicationPosition;
+
+    private void Start()
     {
         OurRigidbody.centerOfMass += Vector3.down;
     }
 
-    // Update is called once per frame
-    void FixedUpdate()
+    private void FixedUpdate()
     {
-         
+        CastGroundRay();
+        ApplyEngineForce();
+        ApplyDrag();
+    }
 
-        var down = Vector3.down;
-        var ray = new Ray(transform.position, down);
-        RaycastHit raycastHit;
-        var didHit = Physics.Raycast(ray, out raycastHit, 3);
-
-        if (didHit)
+    private void ApplyDrag()
+    {
+        if (isGrounded)
         {
-            var forwardOnPlane = Math3d.ProjectVectorOnPlane(raycastHit.normal, transform.forward);
-
-            Debug.DrawRay(
-                raycastHit.point,
-                forwardOnPlane,
-                Color.red
-                );
-
-//            Debug.DrawRay(
-//                raycastHit.point,
-//                transform.forward,
-//                Color.green
-//                );
-//
-//            Debug.DrawRay(
-//                raycastHit.point,
-//                raycastHit.normal,
-//                Color.blue
-//                );
-        }
-
-//        OurRigidbody.AddForceAtPosition(transform.forward * ForceMagnitude, OurRigidbody.worldCenterOfMass);
-
-        if (Input.GetKey(KeyCode.W) && didHit)
-        {
-            var forwardOnPlane = Math3d.ProjectVectorOnPlane(raycastHit.normal, transform.forward).normalized;
-
-            Debug.DrawRay(
-             OurRigidbody.worldCenterOfMass,
-             transform.forward * 10,
-             Color.blue
-             );
-
-            OurRigidbody.AddForceAtPosition(forwardOnPlane * ForceMagnitude, OurRigidbody.worldCenterOfMass + (Vector3.forward + Vector3.up) * 0.1f, ForceMode.Acceleration);
-
-//            OurRigidbody.AddForce(forwardOnPlane * ForceMagnitude, ForceMode.Acceleration);
-        }
-
-        if(Input.GetKey(KeyCode.A))
-        {
-            OurRigidbody.AddRelativeTorque(new Vector3(0, 10 ,0), ForceMode.Acceleration);
-        }
-
-        if (Input.GetKey(KeyCode.D))
-        {
-            OurRigidbody.AddRelativeTorque(new Vector3(0, -10, 0), ForceMode.Acceleration);
+            lateralMovementFactor = 1 -
+                                    Mathf.Abs(Quaternion.Dot(transform.rotation,
+                                        Quaternion.LookRotation(OurRigidbody.velocity)));
+            var dragForce = -1*OurRigidbody.velocity*lateralMovementFactor;
+            OurRigidbody.AddForce(dragForce*DragFactor, ForceMode.Acceleration);
         }
     }
 
-    void OnDrawGizmosSelected()
+    private void ApplyEngineForce()
+    {
+        forceApplicationPosition = transform.position + (transform.rotation*new Vector3(0, 0.05f, 0.05f));
+
+        if (Input.GetKey(KeyCode.W) && isGrounded)
+        {
+            engineForce = forwardDirectionOnPlane*ForceMagnitude;
+            OurRigidbody.AddForceAtPosition(engineForce, transform.position, ForceMode.Acceleration);
+        }
+        else if (Input.GetKey(KeyCode.S) && isGrounded)
+        {
+            engineForce = -forwardDirectionOnPlane*ForceMagnitude;
+            OurRigidbody.AddForceAtPosition(engineForce, transform.position, ForceMode.Acceleration);
+        }
+        if (Input.GetKey(KeyCode.A))
+        {
+            OurRigidbody.AddRelativeTorque(new Vector3(0, TorqueFactor, 0), ForceMode.Acceleration);
+        }
+        else if (Input.GetKey(KeyCode.D))
+        {
+            OurRigidbody.AddRelativeTorque(new Vector3(0, -TorqueFactor, 0), ForceMode.Acceleration);
+        }
+    }
+
+    private void CastGroundRay()
+    {
+        var down = Vector3.down;
+        var ray = new Ray(transform.position, down);
+        RaycastHit raycastHit;
+        isGrounded = Physics.Raycast(ray, out raycastHit, 3);
+        forwardDirectionOnPlane = Math3d.ProjectVectorOnPlane(raycastHit.normal, transform.forward).normalized;
+    }
+
+    private void OnDrawGizmosSelected()
     {
         Gizmos.color = Color.yellow;
         Gizmos.DrawSphere(OurRigidbody.worldCenterOfMass, 0.1f);
+        Gizmos.color = Color.red;
+        Gizmos.DrawSphere(forceApplicationPosition, 0.1f);
     }
 }

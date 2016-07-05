@@ -22,8 +22,8 @@ public class TrackContactBehaviour : MonoBehaviour
 
         if (didHit)
         {
-            var hitPoint = raycastHit.point;
-            var normal = raycastHit.normal;
+//            var hitPoint = raycastHit.point;
+//            var normal = raycastHit.normal;
 
             var vectorToGround = (raycastHit.point - ContactPoint.transform.position);
 
